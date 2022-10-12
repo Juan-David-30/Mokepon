@@ -34,6 +34,7 @@ body{
 .mascotas {
     align-items: center;
     display: flex;
+    flex-wrap: wrap;
     flex-direction: row;
     justify-content: space-around;
     min-height: 45vh;
@@ -64,6 +65,9 @@ body{
     font-size: 30px;
     margin-left: 50px;
     color: white;
+}
+#mascotasseleccionables > div > label:hover {
+    cursor: pointer;
 }
 button{
     background-color: var(--verdeclaro);
