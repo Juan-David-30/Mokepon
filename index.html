@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mokepon</title>
+    <link rel="stylesheet" href="Styles/styles.css">
+    <script src="JS/mokepon.js"></script>
+    <link rel="shortcut icon" href="https://cdn-icons-png.flaticon.com/512/1752/1752681.png" type="image/x-icon">
+</head>
+<body>
+    <h1>Mokepon</h1>
+    <section id="selectMascota">
+        <h2>Selecciona una mascota</h2>
+        <div class="mascotas">
+            <div><input name="mascota" type="radio" value="Hipodoge" id="Hipodoge"/><label for="Hipodoge"> Hipodoge <img src="Styles/Assets/mokepons_mokepon_Hipodoge_attack.webp" alt="Hipodoge"></label></div>
+            <div><input name="mascota" type="radio" value="Capipepo" id="Capipepo"/><label for="Capipepo"> Capipepo <img src="Styles/Assets/mokepons_mokepon_Capipepo_attack.webp" alt="Capipepo"></label></div>
+            <div><input name="mascota" type="radio" value="Ratigueya" id="Ratigueya"/><label for="Ratigueya"> Ratigueya <img src="Styles/Assets/mokepons_mokepon_Ratigueya_attack.webp" alt="Ratigueya"></label></div>
+        </div>
+        <div class="containerboton"><button id="btnselect">Seleccionar</button></div>
+    </section>
+    <section id="selectAtaque">
+        <div id="ataques">
+            <h2>Elige tu ataque</h2>
+            <button class="btn-ataque" id="Tierra">Tierra</button>
+            <button class="btn-ataque" id="Fuego">Fuego</button>
+            <button class="btn-ataque" id="Agua">Agua</button>
+        </div>
+
+        <section id="jugar">
+            <p id="resultadoFinal"></p>
+            <button id="jugardenuevo">Play again</button>
+        </section>
+
+        <div id="Stats">
+            <div id="StatsEnemy">
+                <h2><span id="nomMascotaEn">mascota</span> enemiga</h2>
+                <p id="vidasEnemigo"></p>
+                <img alt="Mascota enemiga" id="imgMascotaEn">
+            </div>
+            <div id="StatsPlayer">
+                <h2>Tu <span id="nomMascota">mascota</span></h2>
+                <p id="vidas"></p>
+                <img alt="Tu mascota" id="imgMascota">
+            </div>
+        </div>
+    </section>    
+    <section id="resultados">
+    </section>
+</body>
+<!--
+<script src="JS/mokepon.js"></script>
+-->
+<!--
+    <script src="JS/codigo.js"></script>
+-->
+</html>

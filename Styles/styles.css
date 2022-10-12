@@ -1,0 +1,153 @@
+:root{
+    --azuloscuro: rgb(10, 4, 60);
+    --azulclaro: rgb(8, 58, 169);
+    --verde : rgb(3, 80, 111);
+    --verdeclaro : rgb(163, 221, 203);
+    --complementario: rgb(255, 227, 222);
+    --verdeoscuro: rgb(24, 176, 125);
+}
+
+*{
+    margin: 0;
+    font-family: Silkscreen;
+    color: white;
+}
+button{
+    color: black;
+}
+@font-face {
+    font-family: 'Silkscreen';
+    src: url('./Silkscreen-Regular.ttf');
+}
+h1{
+    text-align: center;
+    font-size: 50px;
+    background-color: var(--azulclaro);
+    color: white;
+    height: 100px;
+    align-items: center;
+}
+body{
+    min-height: 100vh;
+    background-color: var(--azuloscuro);
+}
+.mascotas {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    height: 45vh;
+    margin-top: 30px;
+}
+
+.mascotas > div > label{
+    background-color: var(--azulclaro);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    min-height: 300px;
+    min-width: 200px;
+    border-radius: 20%;
+    padding: 25px;
+    text-align: center;
+    font-size: 30px;
+}
+.mascotas > div > label > img {
+    width: 270px;
+}
+.mascotas > div > input{
+    visibility: hidden;
+}
+#selectMascota > h2{
+    height: 50px;
+    margin-top: 20px;
+    font-size: 30px;
+    margin-left: 50px;
+    color: white;
+}
+button{
+    background-color: var(--verdeclaro);
+    padding: 15px;
+    border: none;
+    border-radius: 25%;
+    margin: 10px;
+}
+button:hover {
+    background-color: var(--verdeoscuro);
+    animation: seleccionado .5s forwards;
+    cursor:pointer;
+}
+.mascotas > div > input:checked+label{
+    background-color: var(--verdeoscuro);
+    animation: seleccionado 1s forwards;
+}
+.containerboton{
+    display: flex;
+    flex-direction: row-reverse;
+    width: 85%;
+}
+#Fuego{
+    background-color: orange;
+}
+#Tierra{
+    background-color: brown;
+}
+#Agua{
+    background-color: aqua;
+}
+button:disabled{
+    opacity: .6;
+}
+strong{
+    font-size: 30px;
+    margin: 50px;
+    color: orange;
+}
+#Stats{
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: space-around;
+}
+#Stats div{
+    padding: 45px;
+    border-radius:  0 15% 0 15%;
+}
+#Stats div img {
+    width: 350px;
+}
+#StatsPlayer{
+    background-color: var(--azulclaro);
+}
+#StatsEnemy{
+    background-color: rgb(159, 21, 21);
+}
+#vidasEnemigo, #vidas{
+    display: flex;
+    margin-top: 15px;
+    justify-content: start;
+    height: 45px;
+}
+
+#ataques{
+    background-color: var(--verde);
+    text-align: center;
+    padding: 30px;
+    margin-bottom: 20px;
+    border-radius: 0 0 35% 35%;
+}
+#ataques h2{
+    margin-bottom: 30px;
+}
+#jugar{
+    height: 150px;
+    text-align: center;
+    margin: 20px 0 20px 0;
+}
+
+@keyframes seleccionado {
+    from {
+        transform: scale(1,1);
+    }
+    to {
+        transform: scale(1.2,1.2);
+    }
+}
