@@ -32,10 +32,11 @@ body{
     background-color: var(--azuloscuro);
 }
 .mascotas {
+    align-items: center;
     display: flex;
     flex-direction: row;
     justify-content: space-around;
-    height: 45vh;
+    min-height: 45vh;
     margin-top: 30px;
 }
 
@@ -84,6 +85,7 @@ button:hover {
     display: flex;
     flex-direction: row-reverse;
     width: 85%;
+    margin-top: 100px;
 }
 #Fuego{
     background-color: orange;
@@ -142,7 +144,60 @@ strong{
     text-align: center;
     margin: 20px 0 20px 0;
 }
+.ganador{
+    background-color: orange;
+}
+.perdedor{
+    background-color: rgb(159, 21, 21);
+}
+.empate{
+    background-color: var(--azulclaro);
+}
+.MensajeResul{
+    background-color: var(--verde);
+}
+#resultados{
+    display: grid;
+    grid-template-columns: auto 25% auto;
+    width: 50%;
+    margin: 20px 0 35px 0;
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 25px;
+    text-align: center;
+}
+@media (max-width : 1000px) {
+    .mascotas {
+        flex-direction: column;
+        margin-top: 30px;
+    }
+    .mascotas > div >  label {
+        margin: 50px 0 50px 0;
+    }
 
+    #resultados{
+        width: 100%;
+    }
+}
+@media (max-width : 875px) {
+    #Stats{
+        display: flex;
+        flex-direction: column-reverse;
+    }
+    #Stats div{
+        margin: 50px 0 50px 0;
+        align-items: center;
+    }
+}
+@media (max-width : 550px) {
+    #resultados{
+        grid-template-columns: auto auto auto;
+    }
+    #Stats div img {
+        width: 200px;
+    }
+
+}
 @keyframes seleccionado {
     from {
         transform: scale(1,1);

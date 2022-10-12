@@ -31,7 +31,7 @@ function iniciarJuego(){
         location.reload();
     });*/
     //Limpiando sección de mensajes
-    document.getElementById('resultados').innerHTML = '';
+    document.getElementById('resultados').innerHTML = '<div id="AtaquesPlayer"></div><div id="Resultado" class="MensajeResul"></div><div id="AtaquesEnemy"></div>';
     //Limpiando seleccion de mascotas 
     document.getElementById('nomMascotaEn').innerText = 'mascota';
     document.getElementById('nomMascota').innerText = 'mascota';
@@ -125,16 +125,16 @@ function resultadoCombate(){
     let resultado;
 
     if(ataqueenemigo == ataquejugador){
-        resultado = ', ha habido un EMPATE';
+        resultado = 'EMPATE';
     }else if(ataquejugador == 'Fuego' && ataqueenemigo == 'Tierra' || ataquejugador == 'Agua' && ataqueenemigo == 'Fuego' || ataquejugador == 'Tierra' && ataqueenemigo == 'Agua'){
         vidaEnemigo--; 
-        resultado = ', has GANADO!!';
+        resultado = 'VICTORIA';
     }else{
         vidaMascota--;
-        resultado = ', has PERDIDO!!';
+        resultado = 'DERROTA';
     }
 
-    addMessage('Tu mascota atacó con '+ataquejugador+' y el enemigo respondió con '+ataqueenemigo+resultado);
+    addMessage(ataquejugador, ataqueenemigo, resultado);
 
     ActualizandoVidas();
 }
@@ -162,11 +162,26 @@ function ActualizandoVidas(){
 }
 
 //Función para añadir mensajes
-function addMessage(message){
-    const cuadroMensaje = document.getElementById('resultados');
-    const mensaje = document.createElement('p');
-    cuadroMensaje.appendChild(mensaje);
-    mensaje.innerHTML = message;
+function addMessage(jugador, enemigo, resultado){
+    const cuadroMensaje = document.getElementById('AtaquesPlayer');
+    const cuadroMensajeResul = document.getElementById('Resultado');
+    const cuadroMensajeEnemigo = document.getElementById('AtaquesEnemy');
+
+    cuadroMensaje.innerText = jugador; 
+    cuadroMensajeEnemigo.innerText = enemigo; 
+    cuadroMensajeResul.innerText = resultado; 
+
+    
+    if(resultado == 'VICTORIA'){
+        cuadroMensaje.className = 'ganador';
+        cuadroMensajeEnemigo.className = 'perdedor';
+    }else if(resultado == 'DERROTA'){
+        cuadroMensaje.className = 'perdedor';
+        cuadroMensajeEnemigo.className = 'ganador';
+    }else if(resultado == 'EMPATE'){
+        cuadroMensaje.className = 'empate';
+        cuadroMensajeEnemigo.className = 'empate';
+    }
 }
 //Función de finalizar juego
 function GameOver(mensaje){
