@@ -6,19 +6,22 @@ import {mokepones} from './mokepones.mjs';
 //Variables de vida de los personajes
 let vidaMascota;
 let vidaEnemigo; 
+//Id de las mascotas
+let mascotaEnemigo;
+let idMascota; 
 //Variables globales de secciones 
 const opcionesMascotas = document.getElementById('mascotasseleccionables'); 
 const sectElegir = document.getElementById('selectMascota');
 const sectAtaque = document.getElementById('selectAtaque'); 
 const sectReiniciar = document.getElementById('jugar');
+const sectataques = document.getElementById('ataques');
 //Añadiendo mokepones para seleccionar 
-mokepones.forEach(mokepon=>{
-    opcionesMascotas.innerHTML+='<div><input name="mascota" type="radio" value="'+mokepon.nombre+'" id="'+mokepon.nombre+'"/><label for="'+mokepon.nombre+'"> '+mokepon.nombre+' <img src="'+mokepon.foto+'" alt="'+mokepon.nombre+'"></label></div>'
+mokepones.forEach((mokepon, id)=>{
+    idMascota = id; 
+    opcionesMascotas.innerHTML+='<div><input name="mascota" type="radio" value="'+id+'" id="'+mokepon.nombre+'"/><label for="'+mokepon.nombre+'"> '+mokepon.nombre+' <img src="'+mokepon.foto+'" alt="'+mokepon.nombre+'"></label></div>'
 });
 //Atrapando selects de mascotas 
 const radios = document.getElementsByName('mascota');
-//Atrapando botones de ataque 
-const btnsataque = document.getElementsByClassName('btn-ataque');
 /*
 -- Añadiendo eventos a elementos principales 
 */
@@ -28,21 +31,17 @@ document.getElementById('btnselect').addEventListener('click', seleccionarmascot
 document.getElementById('jugardenuevo').addEventListener('click', iniciarJuego);
 //Función para iniciar juego
 function iniciarJuego(){
-    //Reiniciando vidas
-    vidaMascota = 3;
-    vidaEnemigo = 3;
-    ActualizandoVidas();
-    //Añadiendo Función a botones de ataque 
-    for(let i=0; i < btnsataque.length ; i++){
-        btnsataque[i].addEventListener('click', ataque);
-        btnsataque[i].disabled = false; 
-    }
     //Alternativa : 
     /*document.getElementById('jugardenuevo').addEventListener('click', ()=>{
         location.reload();
     });*/
     //Limpiando sección de mensajes
     document.getElementById('resultados').innerHTML = '<div id="AtaquesPlayer"></div><div id="Resultado" class="MensajeResul"></div><div id="AtaquesEnemy"></div>';
+    //limpiando historial
+    historialenemigo = [];
+    historialjugador = [];
+    //Limpiando botones de ataques
+    sectataques.innerHTML = '<h2>Elige tu ataque</h2>';
     //Limpiando seleccion de mascotas 
     document.getElementById('nomMascotaEn').innerText = 'mascota';
     document.getElementById('nomMascota').innerText = 'mascota';
@@ -69,55 +68,66 @@ function seleccionarmascota(){
     alert('No se ha seleccionado ninguna mascota');
 }
 //Función añadir mascota seleccionada al DOM 
-function mascotaSeleccionada(nombre){
+function mascotaSeleccionada(id){
+    //Extrayendo vida del personaje 
+    vidaMascota = mokepones[id].vida;
+    //Colocando información de mascota en stats 
     const nomMascota = document.getElementById('nomMascota');
     const imgMascota = document.getElementById('imgMascota');
-    imgMascota.src = 'Styles/Assets/mokepons_mokepon_'+nombre+'_attack.webp';
-    nomMascota.innerHTML = nombre; 
+    imgMascota.src = mokepones[id].foto;
+    nomMascota.innerHTML = mokepones[id].nombre; 
     sectAtaque.hidden = false; 
-    sectElegir.hidden = true; 
+    sectElegir.hidden = true;
+    //Añadiendo ataques
+    mokepones[id].ataques.forEach( atac =>{
+        sectataques.innerHTML += `<button class="btn-ataque" id="${atac.id}">${atac.nombre}</button>`
+    });
+    //Atrapando botones de ataque 
+    const btnsataque = document.getElementsByClassName('btn-ataque');
+    //Añadiendo Función a botones de ataque 
+    for(let i=0; i < btnsataque.length ; i++){
+        btnsataque[i].addEventListener('click', ataque);
+        btnsataque[i].disabled = false; 
+    }
+    //Añadiendo evento de ataque 
     EnemigoAleatorio();
 }
 //Función para conseguir número aleatorio
 function EnemigoAleatorio(){
-    let mascotaEnemigo = numeroAleatorio(1,3);
-    switch(mascotaEnemigo){
-        case 1:
-            mascotaEnemigo = 'Hipodoge';
-            break; 
-        case 2: 
-            mascotaEnemigo = 'Capipepo';
-            break;
-        default:
-            mascotaEnemigo = 'Ratigueya';
-            break;
-    }
-    document.getElementById('nomMascotaEn').innerHTML = mascotaEnemigo; 
+    mascotaEnemigo = numeroAleatorio(0,mokepones.length-1);
+    document.getElementById('nomMascotaEn').innerHTML = mokepones[mascotaEnemigo].nombre; 
     const imgMascota = document.getElementById('imgMascotaEn');
-    imgMascota.src = 'Styles/Assets/mokepons_mokepon_'+mascotaEnemigo+'_attack.webp';
+    imgMascota.src = mokepones[mascotaEnemigo].foto;
+    vidaEnemigo= mokepones[mascotaEnemigo].vida; 
+    ActualizandoVidas();
 }
 //Variables de ataques 
 let ataquejugador;
 let ataqueenemigo; 
+//Variables de historial
+let historialjugador = []; 
+let historialenemigo = []; 
 //Función para hacer ataque 
-function ataque(tipo){
-    ataquejugador = tipo.target.id; 
+function ataque(boton){
+    ataquejugador = boton.target.id; 
+    historialjugador.push(boton.target.id);
+    boton.target.disabled = true; 
     ataquedelenemigo();
 }
 //Función para el ataque del enemigo 
 function ataquedelenemigo(){
-    let ataque = numeroAleatorio(1,3)
-    switch(ataque){
-        case 1: 
-            ataqueenemigo = 'Fuego';
-            break; 
-        case 2:
-            ataqueenemigo = 'Agua';
-            break; 
-        default: 
-            ataqueenemigo = 'Tierra'
-            break; 
+    let ataque = numeroAleatorio(0,mokepones[mascotaEnemigo].ataques.length-1);
+    let repetido = false; 
+    historialenemigo.forEach(historial=>{
+        if(ataque == historial){
+            repetido = true; 
+        }
+    });
+    if(repetido == true){
+        return ataquedelenemigo();
     }
+    ataqueenemigo = mokepones[mascotaEnemigo].ataques[ataque].id;
+    historialenemigo.push(ataque);
     resultadoCombate();
 }
 //Función que agrega los resultados del combate
@@ -151,6 +161,15 @@ function ActualizandoVidas(){
     }else if(vidaEnemigo <= 0){
         vidasEnemy += '---'
         GameOver('<strong>HAS GANADO EL COMBATE!!!</strong> ');
+    }
+    if(historialjugador.length >= 5 || historialenemigo.length >= 5){
+        if(vidaMascota > vidaEnemigo){
+            GameOver('<strong>HAS GANADO EL COMBATE!!!</strong> ');
+        }else if(vidaMascota < vidaEnemigo){
+            GameOver('<strong>Has perdido el combate :C </strong>');
+        }else{
+            GameOver('<strong>¡HA HABIDO UN EMPATE!</strong> ');
+        }
     }
     document.getElementById('vidas').innerHTML= vidasPlayer;
     document.getElementById('vidasEnemigo').innerHTML = vidasEnemy;

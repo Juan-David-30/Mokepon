@@ -8,9 +8,9 @@ class Mokepon{
     }
 }
 //Creando mokepones
-let Hipodoge = new Mokepon('Hipodoge', 5);
+let Hipodoge = new Mokepon('Hipodoge', 3);
 let Capipepo = new Mokepon('Capipepo', 3);
-let Ratigueya = new Mokepon('Ratigueya', 2);
+let Ratigueya = new Mokepon('Ratigueya', 3);
 //Añadiendo ataques
 Hipodoge.ataques.push(
     {
