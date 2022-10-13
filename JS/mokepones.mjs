@@ -5,6 +5,12 @@ class Mokepon{
         this.foto = "Styles/Assets/mokepons_mokepon_"+nombre+"_attack.webp"; 
         this.vida = vida; 
         this.ataques = []; 
+        this.x = 20;
+        this.y = 30;
+        this.alto = 150;
+        this.ancho = 150; 
+        this.mapaFoto = new Image();
+        this.mapaFoto.src = this.foto; 
     }
 }
 //Creando mokepones
@@ -14,67 +20,67 @@ let Ratigueya = new Mokepon('Ratigueya', 3);
 //Añadiendo ataques
 Hipodoge.ataques.push(
     {
-        nombre: "💧",
+        nombre: "Agua 💧",
         id: "Agua"
     },
     {
-        nombre: "💧",
+        nombre: "Agua 💧",
         id: "Agua"
     },
     {
-        nombre: "💧",
+        nombre: "Agua 💧",
         id: "Agua"
     },
     {
-        nombre: "🔥",
+        nombre: "Fuego 🔥",
         id: "Fuego"
     },
     {
-        nombre: "💎",
+        nombre: "Tierra 💎",
         id: "Tierra"
     }
 );
 Capipepo.ataques.push(
     {
-        nombre: "💎",
+        nombre: "Tierra 💎",
         id: "Tierra"
     },
     {
-        nombre: "💎",
+        nombre: "Tierra 💎",
         id: "Tierra"
     },
     {
-        nombre: "💎",
+        nombre: "Tierra 💎",
         id: "Tierra"
     },
     {
-        nombre: "🔥",
+        nombre: "Fuego 🔥",
         id: "Fuego"
     },
     {
-        nombre: "💧",
+        nombre: "Agua 💧",
         id: "Agua"
     }
 );
 Ratigueya.ataques.push(
     {
-        nombre: "🔥",
+        nombre: "Fuego 🔥",
         id: "Fuego"
     },
     {
-        nombre: "🔥",
+        nombre: "Fuego 🔥",
         id: "Fuego"
     },
     {
-        nombre: "🔥",
+        nombre: "Fuego 🔥",
         id: "Fuego"
     },
     {
-        nombre: "💎",
+        nombre: "Tierra 💎",
         id: "Tierra"
     },
     {
-        nombre: "💧",
+        nombre: "Agua 💧",
         id: "Agua"
     }
 );

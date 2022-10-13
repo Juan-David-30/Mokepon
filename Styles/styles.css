@@ -93,9 +93,11 @@ button:hover {
 }
 #Fuego{
     background-color: orange;
+    color: white;
 }
 #Tierra{
     background-color: brown;
+    color: white;
 }
 #Agua{
     background-color: aqua;
@@ -169,6 +171,15 @@ strong{
     margin-right: auto;
     font-size: 25px;
     text-align: center;
+}
+#verMapa{
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+#mapa{
+    margin-top: 35px;
+    border: 2px solid white;
 }
 @media (max-width : 1000px) {
     .mascotas {

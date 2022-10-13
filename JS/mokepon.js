@@ -9,6 +9,15 @@ let vidaEnemigo;
 //Id de las mascotas
 let mascotaEnemigo;
 let idMascota; 
+//Variables globales de mascota 
+let mascota; 
+let mascotaEnemiga; 
+//Variable de intervalo para movimiento
+let intervalo; 
+//Atrapando mapa
+const sectVerMapa = document.getElementById('verMapa');
+const mapa = document.getElementById('mapa');
+const lienzo = mapa.getContext('2d');
 //Variables globales de secciones 
 const opcionesMascotas = document.getElementById('mascotasseleccionables'); 
 const sectElegir = document.getElementById('selectMascota');
@@ -17,7 +26,6 @@ const sectReiniciar = document.getElementById('jugar');
 const sectataques = document.getElementById('ataques');
 //Añadiendo mokepones para seleccionar 
 mokepones.forEach((mokepon, id)=>{
-    idMascota = id; 
     opcionesMascotas.innerHTML+='<div><input name="mascota" type="radio" value="'+id+'" id="'+mokepon.nombre+'"/><label for="'+mokepon.nombre+'"> '+mokepon.nombre+' <img src="'+mokepon.foto+'" alt="'+mokepon.nombre+'"></label></div>'
 });
 //Atrapando selects de mascotas 
@@ -40,6 +48,9 @@ function iniciarJuego(){
     //limpiando historial
     historialenemigo = [];
     historialjugador = [];
+    //borrando mascotas 
+    mascota = null; 
+    mascotaEnemiga = null; 
     //Limpiando botones de ataques
     sectataques.innerHTML = '<h2>Elige tu ataque</h2>';
     //Limpiando seleccion de mascotas 
@@ -53,6 +64,18 @@ function iniciarJuego(){
     sectElegir.hidden = false; 
     sectAtaque.hidden = true; 
     sectReiniciar.hidden = true; 
+    sectVerMapa.style.display = 'none'; 
+    //Añadiendo funcionalidad a los botones de canvas
+    document.getElementById('arriba').addEventListener('mousedown', mvarriba);
+    document.getElementById('izquierda').addEventListener('mousedown', mvizquierda);
+    document.getElementById('abajo').addEventListener('mousedown', mvabajo);
+    document.getElementById('derecha').addEventListener('mousedown', mvderecha);
+    window.addEventListener('keydown', teclapresionada);
+    window.addEventListener('keyup', stopmv);
+    let botones = document.getElementsByClassName('btnsmv');
+    for(let i=0; i<botones.length; i++){
+        botones[i].addEventListener('mouseup', stopmv);
+    }
 }
 //Función para conseguir aleatoriedad
 function numeroAleatorio(min, max){
@@ -65,19 +88,97 @@ function seleccionarmascota(){
             return mascotaSeleccionada(radios[i].value);
         }
     }
-    alert('No se ha seleccionado ninguna mascota');
 }
 //Función añadir mascota seleccionada al DOM 
 function mascotaSeleccionada(id){
-    //Extrayendo vida del personaje 
+    //Ocultando y mostrando secciones necesarias
+    sectVerMapa.style.display = 'flex'; 
+    sectElegir.hidden = true;
+    //Extrayendo variables globales del personaje 
     vidaMascota = mokepones[id].vida;
+    idMascota = id; 
+    mascota = mokepones[id];
+    //Dibujando mapa con canvas 
+    dibujarMapa(id);
+    //obteniendo enemigo aleatorio 
+    mascotaEnemigo = numeroAleatorio(0,mokepones.length-1);
+    //Añadiendo información a stats 
+    añadirStats(id, mascotaEnemigo);
+}
+//Dibujando mapa con canvas 
+function dibujarMapa(){
+    lienzo.clearRect(0,0,mapa.clientWidth, mapa.height);
+    //dibujando mascota seleccionada en canvas 
+    lienzo.drawImage(mascota.mapaFoto, mascota.x, mascota.y, mascota.ancho,mascota.alto);
+}
+//Funciones mover mascota en canvas 
+function teclapresionada(e){
+    switch(e.key){
+        case "ArrowUp":
+            mvarriba();
+            break;
+        case "ArrowDown":
+            mvabajo();
+            break;
+        case "ArrowLeft":
+            mvizquierda();
+            break; 
+        case "ArrowRight":
+            mvderecha();
+            break; 
+    }
+}
+function mvarriba(){
+    clearInterval(intervalo);
+    intervalo = setInterval( ()=>{
+        mascota.y = mascota.y-5;
+        if(mascota.y < 0){
+            mascota.y = 0;
+        }
+        dibujarMapa();
+    }, 50);
+
+}
+function mvabajo(){
+    clearInterval(intervalo);
+    intervalo = setInterval(()=>{
+        mascota.y = mascota.y+5;
+        if(mascota.y+mascota.alto > mapa.height){
+            mascota.y = mapa.height-mascota.alto;
+        }
+        dibujarMapa();
+    }, 50);
+}
+function mvderecha(){
+    clearInterval(intervalo);
+    intervalo = setInterval(()=>{
+        mascota.x = mascota.x+5;
+        if(mascota.x+mascota.ancho > mapa.width){
+            mascota.x = mapa.width-mascota.ancho;
+        }
+        dibujarMapa();
+    }, 50);
+}
+function mvizquierda(){
+    clearInterval(intervalo);
+    intervalo = setInterval(()=>{
+        mascota.x = mascota.x-5;
+        if(mascota.x < 0){
+            mascota.x = 0;
+        }
+        dibujarMapa();
+    }, 50);
+}
+function stopmv(){
+    clearInterval(intervalo);
+}
+//Función para añadir stats de mascota seleccionada 
+function añadirStats(id, idEnemigo){
     //Colocando información de mascota en stats 
     const nomMascota = document.getElementById('nomMascota');
     const imgMascota = document.getElementById('imgMascota');
     imgMascota.src = mokepones[id].foto;
     nomMascota.innerHTML = mokepones[id].nombre; 
-    sectAtaque.hidden = false; 
-    sectElegir.hidden = true;
     //Añadiendo ataques
     mokepones[id].ataques.forEach( atac =>{
         sectataques.innerHTML += `<button class="btn-ataque" id="${atac.id}">${atac.nombre}</button>`
@@ -89,16 +190,11 @@ function mascotaSeleccionada(id){
         btnsataque[i].addEventListener('click', ataque);
         btnsataque[i].disabled = false; 
     }
-    //Añadiendo evento de ataque 
-    EnemigoAleatorio();
-}
-//Función para conseguir número aleatorio
-function EnemigoAleatorio(){
-    mascotaEnemigo = numeroAleatorio(0,mokepones.length-1);
-    document.getElementById('nomMascotaEn').innerHTML = mokepones[mascotaEnemigo].nombre; 
-    const imgMascota = document.getElementById('imgMascotaEn');
-    imgMascota.src = mokepones[mascotaEnemigo].foto;
-    vidaEnemigo= mokepones[mascotaEnemigo].vida; 
+    //Añadiendo stats enemigo
+    document.getElementById('nomMascotaEn').innerHTML = mokepones[idEnemigo].nombre; 
+    const imgMascotaEnemigo = document.getElementById('imgMascotaEn');
+    imgMascotaEnemigo.src = mokepones[idEnemigo].foto;
+    vidaEnemigo= mokepones[idEnemigo].vida; 
     ActualizandoVidas();
 }
 //Variables de ataques 
