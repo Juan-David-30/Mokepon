@@ -1,22 +1,24 @@
 //Creando clase
 class Mokepon{
-    constructor (nombre, vida){
+    constructor (nombre, vida, ancho, alto, x = .5, y = .1){
         this.nombre = nombre; 
         this.foto = "Styles/Assets/mokepons_mokepon_"+nombre+"_attack.webp"; 
         this.vida = vida; 
         this.ataques = []; 
-        this.x = 20;
-        this.y = 30;
-        this.alto = 150;
-        this.ancho = 150; 
+        this.x = x;
+        this.y = y;
+        this.startx = x; 
+        this.starty = y; 
+        this.alto = alto/2;
+        this.ancho = ancho/2; 
         this.mapaFoto = new Image();
-        this.mapaFoto.src = this.foto; 
+        this.mapaFoto.src = "Styles/Assets/"+nombre+".webp"; 
     }
 }
 //Creando mokepones
-let Hipodoge = new Mokepon('Hipodoge', 3);
-let Capipepo = new Mokepon('Capipepo', 3);
-let Ratigueya = new Mokepon('Ratigueya', 3);
+let Hipodoge = new Mokepon('Hipodoge', 3, 202,197, .2, .7);
+let Capipepo = new Mokepon('Capipepo', 3,179, 216, .1);
+let Ratigueya = new Mokepon('Ratigueya', 3, 188, 210, .3);
 //Añadiendo ataques
 Hipodoge.ataques.push(
     {

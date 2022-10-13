@@ -41,8 +41,5 @@ function jugar(){
 }
 
 const boton = document.getElementById('jugar');
-
 document.addEventListener('load', jugar);
-
-console.log(boton);
 boton.addEventListener('click', jugar);

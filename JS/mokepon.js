@@ -13,11 +13,15 @@ let idMascota;
 let mascota; 
 let mascotaEnemiga; 
 //Variable de intervalo para movimiento
-let intervalo; 
+let intervalox; 
+let intervaloy; 
 //Atrapando mapa
 const sectVerMapa = document.getElementById('verMapa');
 const mapa = document.getElementById('mapa');
 const lienzo = mapa.getContext('2d');
+//Background mapa
+let escenario = new Image();
+escenario.src = 'Styles/Assets/mokemap.webp';
 //Variables globales de secciones 
 const opcionesMascotas = document.getElementById('mascotasseleccionables'); 
 const sectElegir = document.getElementById('selectMascota');
@@ -65,13 +69,6 @@ function iniciarJuego(){
     sectAtaque.hidden = true; 
     sectReiniciar.hidden = true; 
     sectVerMapa.style.display = 'none'; 
-    //Añadiendo funcionalidad a los botones de canvas
-    document.getElementById('arriba').addEventListener('mousedown', mvarriba);
-    document.getElementById('izquierda').addEventListener('mousedown', mvizquierda);
-    document.getElementById('abajo').addEventListener('mousedown', mvabajo);
-    document.getElementById('derecha').addEventListener('mousedown', mvderecha);
-    window.addEventListener('keydown', teclapresionada);
-    window.addEventListener('keyup', stopmv);
     let botones = document.getElementsByClassName('btnsmv');
     for(let i=0; i<botones.length; i++){
         botones[i].addEventListener('mouseup', stopmv);
@@ -98,16 +95,32 @@ function mascotaSeleccionada(id){
     vidaMascota = mokepones[id].vida;
     idMascota = id; 
     mascota = mokepones[id];
+    mascota.x = mapa.width*.6;
+    mascota.y = mapa.height*.6;
     //Dibujando mapa con canvas 
     dibujarMapa(id);
-    //obteniendo enemigo aleatorio 
-    mascotaEnemigo = numeroAleatorio(0,mokepones.length-1);
-    //Añadiendo información a stats 
-    añadirStats(id, mascotaEnemigo);
+    //Añadiendo funcionalidad a los botones de canvas
+    document.getElementById('arriba').addEventListener('mousedown', mvarriba);
+    document.getElementById('izquierda').addEventListener('mousedown', mvizquierda);
+    document.getElementById('abajo').addEventListener('mousedown', mvabajo);
+    document.getElementById('derecha').addEventListener('mousedown', mvderecha);
+    window.addEventListener('keydown', teclapresionada);
+    window.addEventListener('keyup', stopmv);
 }
 //Dibujando mapa con canvas 
 function dibujarMapa(){
+    //limpiando mapa 
     lienzo.clearRect(0,0,mapa.clientWidth, mapa.height);
+    //Añadiendo background
+    lienzo.drawImage(escenario,0,0,mapa.clientWidth, mapa.height);
+    //Dibujando mascotas enemigas 
+    mokepones.forEach(mokepon=>{
+        if(mascota == mokepon){
+            lienzo.drawImage(mokepon.mapaFoto , mokepon.startx*mapa.width, mokepon.starty*mapa.height, mokepon.ancho, mokepon.alto);
+        }
+        lienzo.drawImage(mokepon.mapaFoto, mokepon.x*mapa.width, mokepon.y*mapa.height, mokepon.ancho, mokepon.alto);
+        
+    });
     //dibujando mascota seleccionada en canvas 
     lienzo.drawImage(mascota.mapaFoto, mascota.x, mascota.y, mascota.ancho,mascota.alto);
 }
@@ -126,54 +139,75 @@ function teclapresionada(e){
         case "ArrowRight":
             mvderecha();
             break; 
+        case "Enter":
+            revisarcolision();
+            break; 
     }
 }
 function mvarriba(){
-    clearInterval(intervalo);
-    intervalo = setInterval( ()=>{
+    clearInterval(intervaloy);
+    intervaloy = setInterval( ()=>{
         mascota.y = mascota.y-5;
         if(mascota.y < 0){
             mascota.y = 0;
         }
         dibujarMapa();
-    }, 50);
+    }, 20);
 
 }
 function mvabajo(){
-    clearInterval(intervalo);
-    intervalo = setInterval(()=>{
+    clearInterval(intervaloy);
+    intervaloy = setInterval(()=>{
         mascota.y = mascota.y+5;
         if(mascota.y+mascota.alto > mapa.height){
             mascota.y = mapa.height-mascota.alto;
         }
         dibujarMapa();
-    }, 50);
+    }, 20);
 }
 function mvderecha(){
-    clearInterval(intervalo);
-    intervalo = setInterval(()=>{
+    clearInterval(intervalox);
+    intervalox = setInterval(()=>{
         mascota.x = mascota.x+5;
         if(mascota.x+mascota.ancho > mapa.width){
             mascota.x = mapa.width-mascota.ancho;
         }
         dibujarMapa();
-    }, 50);
+    }, 20);
 }
 function mvizquierda(){
-    clearInterval(intervalo);
-    intervalo = setInterval(()=>{
+    clearInterval(intervalox);
+    intervalox = setInterval(()=>{
         mascota.x = mascota.x-5;
         if(mascota.x < 0){
             mascota.x = 0;
         }
         dibujarMapa();
-    }, 50);
+    }, 20);
 }
 function stopmv(){
-    clearInterval(intervalo);
+    clearInterval(intervalox);
+    clearInterval(intervaloy);
+}
+function revisarcolision(){
+    mokepones.forEach( (mokepon, id)=>{/*
+        let arribaEnemigo = mokepon.starty; 
+        let abajoEnemigo = mokepon.starty+mokepon.alto; */
+        if(!(mokepon.startx*mapa.width > mascota.x+mascota.ancho 
+            || mokepon.startx*mapa.width+mokepon.ancho < mascota.x 
+            || mokepon.starty*mapa.height > mascota.y+mascota.alto 
+            || mokepon.starty*mapa.height+mokepon.alto < mascota.y)){
+            //Añadiendo información a stats 
+            mascotaEnemigo = id; 
+            return añadirStats(idMascota, id);
+        }
+    });
 }
 //Función para añadir stats de mascota seleccionada 
 function añadirStats(id, idEnemigo){
+    //Volviendo visible sección
+    sectAtaque.hidden = false;
+    sectVerMapa.style.display = 'none';
     //Colocando información de mascota en stats 
     const nomMascota = document.getElementById('nomMascota');
     const imgMascota = document.getElementById('imgMascota');
@@ -195,6 +229,7 @@ function añadirStats(id, idEnemigo){
     const imgMascotaEnemigo = document.getElementById('imgMascotaEn');
     imgMascotaEnemigo.src = mokepones[idEnemigo].foto;
     vidaEnemigo= mokepones[idEnemigo].vida; 
+    mascotaEnemiga = mokepones[idEnemigo];
     ActualizandoVidas();
 }
 //Variables de ataques 
