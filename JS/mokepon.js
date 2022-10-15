@@ -3,6 +3,8 @@ import {mokepones} from './mokepones.mjs';
 /*
 -- Definiendo variables y constantes globales
 */
+//Variable que contiene id del jugador dada por el servidor 
+let idjugador; 
 //Variables de vida de los personajes
 let vidaMascota;
 let vidaEnemigo; 
@@ -12,13 +14,23 @@ let idMascota;
 //Variables globales de mascota 
 let mascota; 
 let mascotaEnemiga; 
-//Variable de intervalo para movimiento
-let intervalox; 
-let intervaloy; 
+//Variable de velocidades para movimiento
+let velocidadx = 0; 
+let velocidady = 0;
+//Variable que contiene mokepones enemigos en el mapa
+let jugadoresenemigos; 
 //Atrapando mapa
 const sectVerMapa = document.getElementById('verMapa');
 const mapa = document.getElementById('mapa');
 const lienzo = mapa.getContext('2d');
+if(window.innerWidth < 769){
+    mapa.width = window.innerWidth-20;
+    mapa.height = mapa.width *2/3;
+    mokepones.forEach((mokepon)=>{
+        mokepon.alto = mokepon.alto/2;
+        mokepon.ancho = mokepon.ancho/2;
+    });
+}
 //Background mapa
 let escenario = new Image();
 escenario.src = 'Styles/Assets/mokemap.webp';
@@ -41,6 +53,8 @@ const radios = document.getElementsByName('mascota');
 document.getElementById('btnselect').addEventListener('click', seleccionarmascota);
 //Añadiendo botón de reiniciar juego 
 document.getElementById('jugardenuevo').addEventListener('click', iniciarJuego);
+//Conectandose al backend 
+unirse();
 //Función para iniciar juego
 function iniciarJuego(){
     //Alternativa : 
@@ -73,6 +87,18 @@ function iniciarJuego(){
     for(let i=0; i<botones.length; i++){
         botones[i].addEventListener('mouseup', stopmv);
     }
+    for(let i =0; i<mokepones.length; i++){
+        mokepones[i].x = mokepones[i].startx; 
+        mokepones[i].y = mokepones[i].starty; 
+    }
+}
+//Función para unirse al juego online y adquirir un id 
+async function unirse(){
+    let res = await fetch('http://127.0.0.1:8080/unirse');
+    if(res.ok){
+        idjugador = await res.text();
+        console.log(idjugador);
+    }
 }
 //Función para conseguir aleatoriedad
 function numeroAleatorio(min, max){
@@ -104,25 +130,65 @@ function mascotaSeleccionada(id){
     document.getElementById('izquierda').addEventListener('mousedown', mvizquierda);
     document.getElementById('abajo').addEventListener('mousedown', mvabajo);
     document.getElementById('derecha').addEventListener('mousedown', mvderecha);
+    document.getElementById('combate').addEventListener('click', revisarcolision);
     window.addEventListener('keydown', teclapresionada);
     window.addEventListener('keyup', stopmv);
+    //Enviando mascota al backend 
+    enviarMascota(id);
+}
+//Función para enviar selección de mokepon al backend
+function enviarMascota(idmascota){
+    fetch(`http://127.0.0.1:8080/mokepon/${idjugador}`,{
+        //Indicamos el método
+        method: 'post',
+        //Enviamos metadados para indicar que el contenido es un JSON 
+        headers: {
+            "Content-Type": "application/json"
+        },
+        //En el body enviamos los datos que quermos enviar 
+        body: JSON.stringify({
+            mokepon: idmascota,
+
+        })
+    });
 }
 //Dibujando mapa con canvas 
 function dibujarMapa(){
+    setInterval(()=>{
+    //Actualizando posición de personajes
+    if(velocidadx != 0){
+        mascota.x = mascota.x + velocidadx;
+    }
+    if(velocidady != 0){
+    mascota.y = mascota.y + velocidady;
+    } 
+    //Validaciones de posición
+    if(mascota.y < 0){
+        mascota.y = 0;
+    };
+    if(mascota.y+mascota.alto > mapa.height){
+        mascota.y = mapa.height-mascota.alto;
+    };
+    if(mascota.x < 0){
+        mascota.x = 0;
+    };
+    if(mascota.x+mascota.ancho > mapa.width){
+        mascota.x = mapa.width-mascota.ancho; 
+    };
+    //Enviando posición al servidor y consiguiendo la de los enemigos
+    enviarposicion();
     //limpiando mapa 
     lienzo.clearRect(0,0,mapa.clientWidth, mapa.height);
     //Añadiendo background
     lienzo.drawImage(escenario,0,0,mapa.clientWidth, mapa.height);
     //Dibujando mascotas enemigas 
-    mokepones.forEach(mokepon=>{
-        if(mascota == mokepon){
-            lienzo.drawImage(mokepon.mapaFoto , mokepon.startx*mapa.width, mokepon.starty*mapa.height, mokepon.ancho, mokepon.alto);
-        }
-        lienzo.drawImage(mokepon.mapaFoto, mokepon.x*mapa.width, mokepon.y*mapa.height, mokepon.ancho, mokepon.alto);
-        
-    });
+    if(jugadoresenemigos != null){
+        jugadoresenemigos.forEach(jugador=>{
+            lienzo.drawImage(jugador.mokepon, jugador.x, jugador.y, jugador.width, jugador.height);
+        });
+    }
     //dibujando mascota seleccionada en canvas 
-    lienzo.drawImage(mascota.mapaFoto, mascota.x, mascota.y, mascota.ancho,mascota.alto);
+    lienzo.drawImage(mascota.mapaFoto, mascota.x, mascota.y, mascota.ancho,mascota.alto);}, 20);
 }
 //Funciones mover mascota en canvas 
 function teclapresionada(e){
@@ -145,49 +211,20 @@ function teclapresionada(e){
     }
 }
 function mvarriba(){
-    clearInterval(intervaloy);
-    intervaloy = setInterval( ()=>{
-        mascota.y = mascota.y-5;
-        if(mascota.y < 0){
-            mascota.y = 0;
-        }
-        dibujarMapa();
-    }, 20);
-
+    velocidady = velocidady-5;
 }
 function mvabajo(){
-    clearInterval(intervaloy);
-    intervaloy = setInterval(()=>{
-        mascota.y = mascota.y+5;
-        if(mascota.y+mascota.alto > mapa.height){
-            mascota.y = mapa.height-mascota.alto;
-        }
-        dibujarMapa();
-    }, 20);
+    velocidady = velocidady+5;
 }
 function mvderecha(){
-    clearInterval(intervalox);
-    intervalox = setInterval(()=>{
-        mascota.x = mascota.x+5;
-        if(mascota.x+mascota.ancho > mapa.width){
-            mascota.x = mapa.width-mascota.ancho;
-        }
-        dibujarMapa();
-    }, 20);
+    velocidadx = velocidadx+5;
 }
 function mvizquierda(){
-    clearInterval(intervalox);
-    intervalox = setInterval(()=>{
-        mascota.x = mascota.x-5;
-        if(mascota.x < 0){
-            mascota.x = 0;
-        }
-        dibujarMapa();
-    }, 20);
+    velocidadx = velocidadx-5;
 }
 function stopmv(){
-    clearInterval(intervalox);
-    clearInterval(intervaloy);
+    velocidadx = 0;
+    velocidady = 0;
 }
 function revisarcolision(){
     mokepones.forEach( (mokepon, id)=>{/*
@@ -202,6 +239,34 @@ function revisarcolision(){
             return añadirStats(idMascota, id);
         }
     });
+}
+//Funcion para enviar posición al servidor y traer enemigos
+async function enviarposicion(){
+    let res = await fetch(`http://127.0.0.1:8080/mokepon/${idjugador}/position`, {
+        method: "post",
+        headers: {
+            "Content-Type" : "application/json"
+        }, 
+        body: JSON.stringify({
+            x: mascota.x,
+            y: mascota.y
+        })
+    });
+    let respuesta = await res.json();
+    let enemigos = respuesta.enemigos;
+    if(enemigos!=undefined && enemigos[0] && enemigos != null){
+        var lastarray = enemigos.map(enemigo=>{
+            let mokepon = mokepones[enemigo.mokepon];
+
+            return {
+                mokepon: mokepon.mapaFoto || null, 
+                x: enemigo.x, 
+                y: enemigo.y, 
+                width: mokepon.ancho, 
+                height: mokepon.alto
+            };
+    });}
+    jugadoresenemigos = lastarray; 
 }
 //Función para añadir stats de mascota seleccionada 
 function añadirStats(id, idEnemigo){

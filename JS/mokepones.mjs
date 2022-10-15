@@ -6,9 +6,7 @@ class Mokepon{
         this.vida = vida; 
         this.ataques = []; 
         this.x = x;
-        this.y = y;
-        this.startx = x; 
-        this.starty = y; 
+        this.y = y; 
         this.alto = alto/2;
         this.ancho = ancho/2; 
         this.mapaFoto = new Image();
@@ -19,6 +17,7 @@ class Mokepon{
 let Hipodoge = new Mokepon('Hipodoge', 3, 202,197, .2, .7);
 let Capipepo = new Mokepon('Capipepo', 3,179, 216, .1);
 let Ratigueya = new Mokepon('Ratigueya', 3, 188, 210, .3);
+let Charmander = new Mokepon('Charmander', 3, 420/2, 360/2, .3);
 //Añadiendo ataques
 Hipodoge.ataques.push(
     {
@@ -86,7 +85,29 @@ Ratigueya.ataques.push(
         id: "Agua"
     }
 );
+Charmander.ataques.push(
+    {
+        nombre: "Fuego 🔥",
+        id: "Fuego"
+    },
+    {
+        nombre: "Fuego 🔥",
+        id: "Fuego"
+    },
+    {
+        nombre: "Fuego 🔥",
+        id: "Fuego"
+    },
+    {
+        nombre: "Tierra 💎",
+        id: "Tierra"
+    },
+    {
+        nombre: "Agua 💧",
+        id: "Agua"
+    }
+);
 //Exportando los mokepones 
 let mokepones = [];
-mokepones.push(Hipodoge, Capipepo, Ratigueya);
+mokepones.push(Hipodoge, Capipepo, Ratigueya, Charmander);
 export {mokepones};
