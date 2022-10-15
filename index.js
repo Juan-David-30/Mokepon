@@ -10,9 +10,11 @@ app.use(cors());
 app.use(express.json());
 //Clase de jugadores y lista de jugadores 
 const jugadores = [];
+const combates = []; 
 class Jugador{
     constructor(id){
         this.id = id; 
+        this.mokepon = null; 
     }
     addmokepon(idmokepon){
         this.mokepon = idmokepon; 
@@ -25,6 +27,12 @@ class Jugador{
 class Mokepon{
     constructor(id){
         this.id = id; 
+    }
+}
+class Combate {
+    constructor(j1, j2){
+        this.j1 = j1;
+        this.j2 = j2;
     }
 }
 //Definimos peticiones y como responder a ellas 
@@ -65,6 +73,29 @@ app.post('/mokepon/:idjugador/position', (req, res)=>{
         enemigos
     });     
 });
+app.post('/combate/:idjugador', (req, res)=>{
+    const j1 = req.params.idjugador;
+    const j2 = req.body.id; 
+    const combate = new Combate(j1,j2);
+    combates.push(combate); 
+    console.log(combates); 
+    res.end(); 
+});
+app.get('/combate/:idjugador', (req, res)=>{
+    const j2 = req.params.idjugador; 
+    const combateEnCurso = combates.filter(combate => combate.j2 == j2); 
+    if(combateEnCurso[0]){
+        let id = findplayer(combateEnCurso[0].j1)
+        return res.send({
+            rival:jugadores[id]
+        })
+    }else{
+        res.send({
+            rival: null
+        })
+    }
+
+}); 
 //Funcion encontrar jugador; 
 function findplayer(jugadorId){
     return jugadores.findIndex(jugador =>jugador.id === jugadorId); 

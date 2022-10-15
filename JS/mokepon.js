@@ -19,6 +19,8 @@ let velocidadx = 0;
 let velocidady = 0;
 //Variable que contiene mokepones enemigos en el mapa
 let jugadoresenemigos; 
+//Intervalo del mapa
+let mapaInterval; 
 //Atrapando mapa
 const sectVerMapa = document.getElementById('verMapa');
 const mapa = document.getElementById('mapa');
@@ -147,14 +149,15 @@ function enviarMascota(idmascota){
         },
         //En el body enviamos los datos que quermos enviar 
         body: JSON.stringify({
-            mokepon: idmascota,
-
+            mokepon: idmascota
         })
     });
 }
 //Dibujando mapa con canvas 
 function dibujarMapa(){
-    setInterval(()=>{
+    mapaInterval = setInterval(()=>{
+    //validando que no haya iniciado algun combate 
+    iniciarCombate();
     //Actualizando posición de personajes
     if(velocidadx != 0){
         mascota.x = mascota.x + velocidadx;
@@ -184,7 +187,9 @@ function dibujarMapa(){
     //Dibujando mascotas enemigas 
     if(jugadoresenemigos != null){
         jugadoresenemigos.forEach(jugador=>{
-            lienzo.drawImage(jugador.mokepon, jugador.x, jugador.y, jugador.width, jugador.height);
+            if(jugador.mokepon !== null){
+                lienzo.drawImage(jugador.mokepon, jugador.x, jugador.y, jugador.width, jugador.height);
+            }
         });
     }
     //dibujando mascota seleccionada en canvas 
@@ -227,18 +232,45 @@ function stopmv(){
     velocidady = 0;
 }
 function revisarcolision(){
-    mokepones.forEach( (mokepon, id)=>{/*
-        let arribaEnemigo = mokepon.starty; 
-        let abajoEnemigo = mokepon.starty+mokepon.alto; */
-        if(!(mokepon.startx*mapa.width > mascota.x+mascota.ancho 
-            || mokepon.startx*mapa.width+mokepon.ancho < mascota.x 
-            || mokepon.starty*mapa.height > mascota.y+mascota.alto 
-            || mokepon.starty*mapa.height+mokepon.alto < mascota.y)){
+    let combate = null ; 
+    jugadoresenemigos.forEach( jugador =>{
+        if(!(jugador.x > mascota.x+mascota.ancho 
+            || jugador.x+jugador.width < mascota.x 
+            || jugador.y > mascota.y+mascota.alto 
+            || jugador.y+jugador.height < mascota.y)){
             //Añadiendo información a stats 
-            mascotaEnemigo = id; 
-            return añadirStats(idMascota, id);
+            mascotaEnemigo = jugador.idmokepon; 
+            combate = jugador; 
+            return añadirStats(idMascota, mascotaEnemigo);
         }
     });
+    if(combate != null){
+        iniciarCombate(combate.id); 
+    }
+}
+//Función para iniciar combate online
+function iniciarCombate(idJugador = null){
+    if(idJugador !=null){
+        fetch(`http://127.0.0.1:8080/combate/${idjugador}`, {
+            method: 'post',
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                id: idJugador
+            })
+        })
+    }else{
+        fetch(`http://127.0.0.1:8080/combate/${idjugador}`).then(res =>{
+            res.json()
+                .then(rival=>{
+                    if(rival.rival != null){
+                        mascotaEnemigo = rival.rival.mokepon; 
+                        return añadirStats(idMascota, rival.rival.mokepon);
+                    }
+                })
+        })
+    }
 }
 //Funcion para enviar posición al servidor y traer enemigos
 async function enviarposicion(){
@@ -254,22 +286,38 @@ async function enviarposicion(){
     });
     let respuesta = await res.json();
     let enemigos = respuesta.enemigos;
-    if(enemigos!=undefined && enemigos[0] && enemigos != null){
+    if(enemigos[0]){
         var lastarray = enemigos.map(enemigo=>{
-            let mokepon = mokepones[enemigo.mokepon];
+            if(enemigo.mokepon !== null){
+                let mokepon = mokepones[enemigo.mokepon];
 
-            return {
-                mokepon: mokepon.mapaFoto || null, 
-                x: enemigo.x, 
-                y: enemigo.y, 
-                width: mokepon.ancho, 
-                height: mokepon.alto
-            };
+                return {
+                    mokepon: mokepon.mapaFoto || "", 
+                    x: enemigo.x, 
+                    y: enemigo.y, 
+                    width: mokepon.ancho, 
+                    height: mokepon.alto,
+                    idmokepon: enemigo.mokepon,
+                    id: enemigo.id
+                };
+            }else{
+                return {
+                    mokepon: null, 
+                    x: null, 
+                    y: null, 
+                    width: null, 
+                    height: null,
+                    idmokepon: enemigo.mokepon,
+                    id: enemigo.id
+                };
+            }
     });}
     jugadoresenemigos = lastarray; 
 }
 //Función para añadir stats de mascota seleccionada 
 function añadirStats(id, idEnemigo){
+    //Deteniendo el intervalo del mapa 
+    clearInterval(mapaInterval);
     //Volviendo visible sección
     sectAtaque.hidden = false;
     sectVerMapa.style.display = 'none';
@@ -278,6 +326,7 @@ function añadirStats(id, idEnemigo){
     const imgMascota = document.getElementById('imgMascota');
     imgMascota.src = mokepones[id].foto;
     nomMascota.innerHTML = mokepones[id].nombre; 
+    sectataques.innerHTML = ""; 
     //Añadiendo ataques
     mokepones[id].ataques.forEach( atac =>{
         sectataques.innerHTML += `<button class="btn-ataque" id="${atac.id}">${atac.nombre}</button>`
