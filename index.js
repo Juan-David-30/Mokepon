@@ -125,12 +125,10 @@ app.get('/enCombate/:idjugador/:player/:combate',(req, res)=>{
 
     const combat = combates.findIndex(combate => combate.id == idCombate);
     if(playerType == 'j1'){
-        console.log('se está ejecutando')
         res.send({
             enemigo: combates[combat].ataquesj2 || []
         });
     }else if(playerType == 'j2'){
-        console.log('se está ejecutando')
         res.send({
             enemigo: combates[combat].ataquesj1 || []
         });
@@ -153,6 +151,7 @@ app.get('/QuitarDelMapa/:combate', (req, res)=>{
         jugadores[findplayer(combates[idCombate].j1)].mokepon = null; 
         jugadores[findplayer(combates[idCombate].j2)].mokepon = null;
     }
+    res.end(); 
 });
 //Funcion encontrar jugador; 
 function findplayer(jugadorId){
@@ -160,7 +159,6 @@ function findplayer(jugadorId){
 }
 //Iniciando listener del servidor y definiendo constantes de dicho servidor 
 const puerto = 8080;
-const hostname = 'localhost';
-app.listen(puerto, hostname, ()=>{
+app.listen(puerto, ()=>{
     console.log('El servidor ya inició');
 });
