@@ -108,20 +108,16 @@ app.post('/enCombate/:idjugador/:player/:combate',(req, res)=>{
 
     const combat = combates.findIndex(combate => combate.id == idCombate);
     if(playerType == 'j1'){
-        console.log('ejecutando desde post');
         combates[combat].ataquesJ1(historial);
         res.send({
             enemigo: combates[combat].ataquesj2 || []
         });
     }else if(playerType == 'j2'){
-        console.log('ejecutando desde post');
         combates[combat].ataquesJ2(historial); 
         res.send({
             enemigo: combates[combat].ataquesj1 || []
         });
     };
-    console.log(combates[combat]); 
-
 });
 app.get('/enCombate/:idjugador/:player/:combate',(req, res)=>{
     const playerType = req.params.player; 
@@ -139,7 +135,6 @@ app.get('/enCombate/:idjugador/:player/:combate',(req, res)=>{
             enemigo: combates[combat].ataquesj1 || []
         });
     };
-    console.log(combates[combat]); 
 });
 app.get('/TerminarCombate/:idCombate', (req, res)=>{
     const idCombate = req.params.idCombate; 
