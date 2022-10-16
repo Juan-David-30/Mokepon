@@ -92,6 +92,7 @@ function iniciarJuego(){
     let botones = document.getElementsByClassName('btnsmv');
     for(let i=0; i<botones.length; i++){
         botones[i].addEventListener('mouseup', stopmv);
+        botones[i].addEventListener('touchend', stopmv);
     }
     for(let i =0; i<mokepones.length; i++){
         mokepones[i].x = mokepones[i].startx; 
@@ -136,6 +137,10 @@ function mascotaSeleccionada(id){
     document.getElementById('izquierda').addEventListener('mousedown', mvizquierda);
     document.getElementById('abajo').addEventListener('mousedown', mvabajo);
     document.getElementById('derecha').addEventListener('mousedown', mvderecha);
+    document.getElementById('arriba').addEventListener('touchstart', mvarriba);
+    document.getElementById('izquierda').addEventListener('touchstart', mvizquierda);
+    document.getElementById('abajo').addEventListener('touchstart', mvabajo);
+    document.getElementById('derecha').addEventListener('touchstart', mvderecha);
     document.getElementById('combate').addEventListener('click', revisarcolision);
     window.addEventListener('keydown', teclapresionada);
     window.addEventListener('keyup', stopmv);
