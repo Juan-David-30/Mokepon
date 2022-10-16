@@ -6,6 +6,8 @@ const cors = require('cors');
 const app = express();
 //Hacemos que express use cors
 app.use(cors());
+//Ruta estatica
+app.use(express.static('public'));
 //Confuguramos express para que pueda recibir peticiones con JSON
 app.use(express.json());
 //Clase de jugadores y lista de jugadores 
@@ -149,13 +151,21 @@ app.get('/TerminarCombate/:idCombate', (req, res)=>{
     console.log(combates);
     res.end(); 
 });
+app.get('/QuitarDelMapa/:combate', (req, res)=>{
+    const combat = req.params.combate; 
+    const idCombate = combates.findIndex(combate => combate.id == combat); 
+    if(idCombate != -1){
+        jugadores[findplayer(combates[idCombate].j1)].mokepon = null; 
+        jugadores[findplayer(combates[idCombate].j2)].mokepon = null;
+    }
+});
 //Funcion encontrar jugador; 
 function findplayer(jugadorId){
     return jugadores.findIndex(jugador =>jugador.id === jugadorId); 
 }
 //Iniciando listener del servidor y definiendo constantes de dicho servidor 
 const puerto = 8080;
-const hostname = '127.0.0.1';
+const hostname = 'localhost';
 app.listen(puerto, hostname, ()=>{
     console.log('El servidor ya inició');
 });

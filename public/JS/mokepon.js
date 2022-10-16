@@ -356,6 +356,9 @@ function añadirStats(id, idEnemigo){
     vidaEnemigo= mokepones[idEnemigo].vida; 
     mascotaEnemiga = mokepones[idEnemigo];
     ActualizandoVidas();
+    if(playertype == 'j2'){
+        fetch('http://127.0.0.1:8080/QuitarDelMapa/'+combateEnCurso); 
+    }
 }
 //Variables de ataques 
 let ataquejugador;
@@ -387,50 +390,38 @@ function ataques(){
     }).then(respuesta=>{
         respuesta.json().then(content=>{
             historialenemigo = content.enemigo;
-        });
-    });
-    if(historialenemigo[historialjugador.length-1]){
-        ataqueenemigo = historialenemigo[historialjugador.length-1];
-        resultadoCombate(); 
-    }else{
-        for(let i=0; i<btnsataque.length; i++){
-            btnsataque[i].style.display = 'none';
-        }
-        addMessage(ataquejugador, "Esperando...", "---");
-        document.getElementById('AtaquesPlayer').className = 'empate';
-        document.getElementById('AtaquesEnemy').className = 'empate';
-        buscarAtaques = setInterval(()=>{
-            fetch(`http://127.0.0.1:8080/enCombate/${idjugador}/${playertype}/${combateEnCurso}`,).then(respuesta=>{
-        respuesta.json().then(content =>{
-            historialenemigo = content.enemigo;
-        });
-        if(historialenemigo[historialjugador.length-1]){
-            for(let i=0; i<btnsataque.length; i++){
-                btnsataque[i].style.display = 'inline';
+            if(historialenemigo[historialjugador.length-1]){
+                ataqueenemigo = historialenemigo[historialjugador.length-1];
+                resultadoCombate(); 
+            }else{
+                for(let i=0; i<btnsataque.length; i++){
+                    btnsataque[i].style.display = 'none';
+                }
+                addMessage(ataquejugador, "Esperando...", "---");
+                document.getElementById('AtaquesPlayer').className = 'empate';
+                document.getElementById('AtaquesEnemy').className = 'empate';
+                ataquedelenemigo(); 
             }
-            ataqueenemigo = historialenemigo[historialjugador.length-1]; 
-            resultadoCombate();
-            clearInterval(buscarAtaques); 
-        }
+        });
     });
-        }, 100); 
-    }
 }
 //Función para el ataque del enemigo 
 function ataquedelenemigo(){
-    let ataque = numeroAleatorio(0,mokepones[mascotaEnemigo].ataques.length-1);
-    let repetido = false; 
-    historialenemigo.forEach(historial=>{
-        if(ataque == historial){
-            repetido = true; 
-        }
+    console.log('Calculando')
+    fetch(`http://127.0.0.1:8080/enCombate/${idjugador}/${playertype}/${combateEnCurso}`,).then(respuesta=>{
+    respuesta.json().then(content =>{
+        historialenemigo = content.enemigo;
     });
-    if(repetido == true){
-        return ataquedelenemigo();
+    if(historialenemigo[historialjugador.length-1]){
+        for(let i=0; i<btnsataque.length; i++){
+            btnsataque[i].style.display = 'inline';
+        }
+        ataqueenemigo = historialenemigo[historialjugador.length-1]; 
+        return resultadoCombate();
+    }else{
+        setTimeout(ataquedelenemigo, 200); 
     }
-    ataqueenemigo = mokepones[mascotaEnemigo].ataques[ataque].id;
-    historialenemigo.push(ataque);
-    resultadoCombate();
+    });
 }
 //Función que agrega los resultados del combate
 function resultadoCombate(){
@@ -509,7 +500,7 @@ function GameOver(mensaje){
         btnsataque[i].disabled = true;
     }
     sectReiniciar.hidden = false; 
-    setTimeout(()=>{fetch(`http://127.0.0.1:8080/TerminarCombate/${combateEnCurso}`);}, 300);
+    setTimeout(()=>{fetch(`http://127.0.0.1:8080/TerminarCombate/${combateEnCurso}`);}, 700);
 }
 //Ejecutando inicio de juego
 document.addEventListener('DOMContentLoaded', iniciarJuego);
