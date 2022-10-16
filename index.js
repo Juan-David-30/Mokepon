@@ -10,7 +10,7 @@ app.use(cors());
 app.use(express.json());
 //Clase de jugadores y lista de jugadores 
 const jugadores = [];
-const combates = []; 
+let combates = []; 
 class Jugador{
     constructor(id){
         this.id = id; 
@@ -24,15 +24,17 @@ class Jugador{
         this.y = y;
     }
 }
-class Mokepon{
-    constructor(id){
-        this.id = id; 
-    }
-}
 class Combate {
     constructor(j1, j2){
+        this.id = Math.random(); 
         this.j1 = j1;
         this.j2 = j2;
+    }
+    ataquesJ1(j1){
+        this.ataquesj1 = j1;
+    }
+    ataquesJ2(j2){
+        this.ataquesj2 = j2; 
     }
 }
 //Definimos peticiones y como responder a ellas 
@@ -51,15 +53,13 @@ app.post('/mokepon/:jugadorId', (req, res)=>{
     //Extraigo las variables del body  a través del objeto request 
     const idmokepon = req.body.mokepon || "";
 
-    const mokepon = new Mokepon(idmokepon);
-
     let idjugador = findplayer(jugadorId);
 
     jugadores[idjugador].addmokepon(idmokepon); 
     //Haciendo que la consola logee las variables para verficar que todo este correcto 
-    console.log(jugadores);
+    //console.log(jugadores);
     //Una vez ya extragimos de la URL la variable, podemos utilizarla sin problema 
-    console.log(jugadorId);
+    //console.log(jugadorId);
     //Para finalizar la respuesta
     res.end();
 });
@@ -78,8 +78,9 @@ app.post('/combate/:idjugador', (req, res)=>{
     const j2 = req.body.id; 
     const combate = new Combate(j1,j2);
     combates.push(combate); 
-    console.log(combates); 
-    res.end(); 
+    res.send({
+        id: combate.id
+    }); 
 });
 app.get('/combate/:idjugador', (req, res)=>{
     const j2 = req.params.idjugador; 
@@ -87,7 +88,8 @@ app.get('/combate/:idjugador', (req, res)=>{
     if(combateEnCurso[0]){
         let id = findplayer(combateEnCurso[0].j1)
         return res.send({
-            rival:jugadores[id]
+            rival:jugadores[id],
+            id: combateEnCurso[0].id
         })
     }else{
         res.send({
@@ -95,7 +97,58 @@ app.get('/combate/:idjugador', (req, res)=>{
         })
     }
 
-}); 
+});
+app.post('/enCombate/:idjugador/:player/:combate',(req, res)=>{
+    const playerType = req.params.player; 
+    const idCombate = req.params.combate;
+
+    const historial = req.body.ataques; 
+
+    const combat = combates.findIndex(combate => combate.id == idCombate);
+    if(playerType == 'j1'){
+        console.log('ejecutando desde post');
+        combates[combat].ataquesJ1(historial);
+        res.send({
+            enemigo: combates[combat].ataquesj2 || []
+        });
+    }else if(playerType == 'j2'){
+        console.log('ejecutando desde post');
+        combates[combat].ataquesJ2(historial); 
+        res.send({
+            enemigo: combates[combat].ataquesj1 || []
+        });
+    };
+    console.log(combates[combat]); 
+
+});
+app.get('/enCombate/:idjugador/:player/:combate',(req, res)=>{
+    const playerType = req.params.player; 
+    const idCombate = req.params.combate;
+
+    const combat = combates.findIndex(combate => combate.id == idCombate);
+    if(playerType == 'j1'){
+        console.log('se está ejecutando')
+        res.send({
+            enemigo: combates[combat].ataquesj2 || []
+        });
+    }else if(playerType == 'j2'){
+        console.log('se está ejecutando')
+        res.send({
+            enemigo: combates[combat].ataquesj1 || []
+        });
+    };
+    console.log(combates[combat]); 
+});
+app.get('/TerminarCombate/:idCombate', (req, res)=>{
+    const idCombate = req.params.idCombate; 
+
+    const combat = combates.findIndex(combate => combate.id == idCombate);
+    if(combat != -1){
+        combates = combates.filter(combate => combate.id != idCombate); 
+    }
+    console.log(combates);
+    res.end(); 
+});
 //Funcion encontrar jugador; 
 function findplayer(jugadorId){
     return jugadores.findIndex(jugador =>jugador.id === jugadorId); 

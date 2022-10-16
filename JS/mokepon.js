@@ -21,6 +21,9 @@ let velocidady = 0;
 let jugadoresenemigos; 
 //Intervalo del mapa
 let mapaInterval; 
+//Id del combate en curso
+let combateEnCurso; 
+let playertype; 
 //Atrapando mapa
 const sectVerMapa = document.getElementById('verMapa');
 const mapa = document.getElementById('mapa');
@@ -42,6 +45,7 @@ const sectElegir = document.getElementById('selectMascota');
 const sectAtaque = document.getElementById('selectAtaque'); 
 const sectReiniciar = document.getElementById('jugar');
 const sectataques = document.getElementById('ataques');
+let btnsataque; 
 //Añadiendo mokepones para seleccionar 
 mokepones.forEach((mokepon, id)=>{
     opcionesMascotas.innerHTML+='<div><input name="mascota" type="radio" value="'+id+'" id="'+mokepon.nombre+'"/><label for="'+mokepon.nombre+'"> '+mokepon.nombre+' <img src="'+mokepon.foto+'" alt="'+mokepon.nombre+'"></label></div>'
@@ -56,7 +60,7 @@ document.getElementById('btnselect').addEventListener('click', seleccionarmascot
 //Añadiendo botón de reiniciar juego 
 document.getElementById('jugardenuevo').addEventListener('click', iniciarJuego);
 //Conectandose al backend 
-unirse();
+unirse()
 //Función para iniciar juego
 function iniciarJuego(){
     //Alternativa : 
@@ -249,15 +253,20 @@ function revisarcolision(){
     }
 }
 //Función para iniciar combate online
-function iniciarCombate(idJugador = null){
-    if(idJugador !=null){
+function iniciarCombate(id = null){
+    if(id !=null){
         fetch(`http://127.0.0.1:8080/combate/${idjugador}`, {
             method: 'post',
             headers: {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                id: idJugador
+                id: id
+            })
+        }).then(repuesta=>{
+            repuesta.json().then(res=>{
+                combateEnCurso = res.id; 
+                playertype = 'j1';
             })
         })
     }else{
@@ -266,6 +275,8 @@ function iniciarCombate(idJugador = null){
                 .then(rival=>{
                     if(rival.rival != null){
                         mascotaEnemigo = rival.rival.mokepon; 
+                        combateEnCurso = rival.id; 
+                        playertype = 'j2';
                         return añadirStats(idMascota, rival.rival.mokepon);
                     }
                 })
@@ -332,7 +343,7 @@ function añadirStats(id, idEnemigo){
         sectataques.innerHTML += `<button class="btn-ataque" id="${atac.id}">${atac.nombre}</button>`
     });
     //Atrapando botones de ataque 
-    const btnsataque = document.getElementsByClassName('btn-ataque');
+    btnsataque = document.getElementsByClassName('btn-ataque');
     //Añadiendo Función a botones de ataque 
     for(let i=0; i < btnsataque.length ; i++){
         btnsataque[i].addEventListener('click', ataque);
@@ -357,7 +368,53 @@ function ataque(boton){
     ataquejugador = boton.target.id; 
     historialjugador.push(boton.target.id);
     boton.target.disabled = true; 
-    ataquedelenemigo();
+
+    ataques(); 
+    //ataquedelenemigo();
+}
+//Intervalo busqueda de ataques
+let buscarAtaques; 
+//Funcion para enviar ataques al servidor y pedir los del enemigo
+function ataques(){
+    fetch(`http://127.0.0.1:8080/enCombate/${idjugador}/${playertype}/${combateEnCurso}`,{
+        method: 'post',
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            ataques: historialjugador
+        })
+    }).then(respuesta=>{
+        respuesta.json().then(content=>{
+            historialenemigo = content.enemigo;
+        });
+    });
+    if(historialenemigo[historialjugador.length-1]){
+        ataqueenemigo = historialenemigo[historialjugador.length-1];
+        resultadoCombate(); 
+    }else{
+        for(let i=0; i<btnsataque.length; i++){
+            btnsataque[i].style.display = 'none';
+        }
+        addMessage(ataquejugador, "Esperando...", "---");
+        document.getElementById('AtaquesPlayer').className = 'empate';
+        document.getElementById('AtaquesEnemy').className = 'empate';
+        buscarAtaques = setInterval(()=>{
+            fetch(`http://127.0.0.1:8080/enCombate/${idjugador}/${playertype}/${combateEnCurso}`,).then(respuesta=>{
+        respuesta.json().then(content =>{
+            historialenemigo = content.enemigo;
+        });
+        if(historialenemigo[historialjugador.length-1]){
+            for(let i=0; i<btnsataque.length; i++){
+                btnsataque[i].style.display = 'inline';
+            }
+            ataqueenemigo = historialenemigo[historialjugador.length-1]; 
+            resultadoCombate();
+            clearInterval(buscarAtaques); 
+        }
+    });
+        }, 100); 
+    }
 }
 //Función para el ataque del enemigo 
 function ataquedelenemigo(){
@@ -452,6 +509,7 @@ function GameOver(mensaje){
         btnsataque[i].disabled = true;
     }
     sectReiniciar.hidden = false; 
+    setTimeout(()=>{fetch(`http://127.0.0.1:8080/TerminarCombate/${combateEnCurso}`);}, 300);
 }
 //Ejecutando inicio de juego
 document.addEventListener('DOMContentLoaded', iniciarJuego);
